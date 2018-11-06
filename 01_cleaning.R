@@ -89,7 +89,35 @@ svy_monkey6 <- svy_monkey5[-1,]
 vis_dat(svy_monkey6)
 vis_miss(svy_monkey6)
 
-#
+#Remove observations with missing data. Remove 260, 574, 158
+#Andrew Help
+attach(svy_monkey6)
+svy_monkey7 <- svy_monkey6[which(study_num == -c("260","574","158")),]
+detach(svy_monkey6)  
+
+#Mutate to add additional Column antibiotics_yes_no
+svy_monkey7<- svy_monkey6
+
+svy_monkey8 <- mutate(svy_monkey7,ab_no = ifelse(grepl("No|NO|N0|no|entocort", svy_monkey7$antibiotic), "No", "Yes"))
+
+#Reorder Columns so that Antibiotics next to Ab_no 
+names(svy_monkey8)
+
+svy_monkey9 <- svy_monkey8[c(1:9,10, 38, 11:37)]
+
+# fix antibiotic exposure
+#ideally edit each entry to include a clear (and correct) Yes or No,
+# edit out any inadvertent "no" or "not"
+# note that some yes = entocort, zofran
+
+
+svy_monkey7$antibiotic[grepl("yes", svy_monkey7$antibiotic_exp, ignore.case = TRUE)] <- "Yes"
+
+pets$abx[grepl("no", pets$antibiotic_exp, ignore.case = TRUE)] <- "No"
+pets$abx[c(19,21,28, 33,36,47,52, 62, 63,65,66,72,73,76)] <- "Yes"
+pets$abx[c(16,37, 46,74,75)] <- "No"
+
+str(svy_monkey6)
 
 ##################
 
@@ -149,10 +177,6 @@ pets$abx[c(16,37, 46,74,75)] <- "No"
 #pets$dairy <- as.integer(pets$dairy)
 
 # check, fix cdi Yes/no
-
-
-
-
 
 
 # fix adl variables - sum up
