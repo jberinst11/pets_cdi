@@ -16,6 +16,7 @@ library(naniar)
 library(plotly)
 library(readxl)
 library(devtools)
+library(tidyr)
 
 
 #Import master_survey and svy_monkey
@@ -91,24 +92,66 @@ vis_miss(svy_monkey6)
 
 #Remove observations with missing data. Remove 260, 574, 158
 #Andrew Help
-attach(svy_monkey6)
-svy_monkey7 <- svy_monkey6[which(study_num == -c("260","574","158")),]
-detach(svy_monkey6)  
+#attach(svy_monkey6)
+#svy_monkey7 <- svy_monkey6[which(study_num == -c("260","574","158")),]
+#detach(svy_monkey6)  
 
 #Mutate to add additional Column antibiotics_yes_no
 svy_monkey7<- svy_monkey6
 
-svy_monkey8 <- mutate(svy_monkey7,ab_no = ifelse(grepl("No|NO|N0|no|entocort", svy_monkey7$antibiotic), "No", "Yes"))
+svy_monkey8 <- mutate(svy_monkey7,antibiotics_no = ifelse(grepl("No|NO|N0|no|entocort", svy_monkey7$antibiotic), "No", "Yes"))
 
 #Reorder Columns so that Antibiotics next to Ab_no 
 names(svy_monkey8)
 
-svy_monkey9 <- svy_monkey8[c(1:9,10, 38, 11:37)]
+svy_monkey9 <- svy_monkey8[c(1:9,10, 38, 11:37)] 
 
-# fix antibiotic exposure
-#ideally edit each entry to include a clear (and correct) Yes or No,
-# edit out any inadvertent "no" or "not"
 # note that some yes = entocort, zofran
+#This was personally verified to ensure it transferred
+
+#Gather all the PPI
+
+svy_monkey10 <-gather(svy_monkey9,type,value,omeprazole:pantoprazole)
+svy_monkey11 <- mutate(svy_monkey10, ppi = ifelse(is.na(svy_monkey10$value), "No", "Yes"))
+
+#Gather all the H2RA
+names(svy_monkey11)
+svy_monkey12 <-gather(svy_monkey11,type1,value1,famotidine:nizatidine)
+svy_monkey13 <- mutate(svy_monkey12, h2ra = ifelse(is.na(svy_monkey12$value1), "No", "Yes"))
+
+#Convert "I Have not uced acid blockers"
+
+svy_monkey14 <- mutate(svy_monkey13, acid_blocker_yes  = ifelse(grepl("blocking", acid_blocker), "no", "yes"))
+
+names(svy_monkey14)
+drop <- c("type","value","type1","value2")
+
+svy_monkey15 <- svy_monkey14[,-c(29,30,32,33)] 
+
+###########
+
+svy_monkey10 <- svy_monkey9 %>% 
+mutate(ppi = ("omeprazole" + "pantoprazole"))
+
+svy_monkey10 <-gather(svy_monkey9,type,value,omeprazole:pantoprazole)
+svy_monkey11 <- svy_monkey9 %>% 
+  mutate(ppi= svy_monkey10$value)
+         
+svy_monkey11 <- svy_monkey10[c(1:16, 35, 17:33)] 
+names(svy_monkey10)
+
+
+svy_monkey10 <- mutate(svy_monkey9,PPI_yes = ifelse(grepl("omep|esom|prevacid|dexlansoprazole|rabeprazole|pantoprazole", svy_monkey9$ppi), "yes", "no"))
+
+svy_monkey10 <- gather(svy_monkey9, key="ppi", value = "omeprazole")
+
+
+
+svy_monkey10 <- mutate(svy_monkey9,PPI_yes = ifelse(grepl("omeprazole|esomeprazole|prevacid|dexlansoprazole|rabeprazole|pantoprazole", svy_monkey7$), "No", "Yes"))
+
+names(svy_monkey9)
+
+
 
 
 svy_monkey7$antibiotic[grepl("yes", svy_monkey7$antibiotic_exp, ignore.case = TRUE)] <- "Yes"
