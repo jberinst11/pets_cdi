@@ -124,12 +124,50 @@ svy_monkey13 <- mutate(svy_monkey12, h2ra = ifelse(is.na(svy_monkey12$value1), "
 svy_monkey14 <- mutate(svy_monkey13, acid_blocker_yes  = ifelse(grepl("blocking", acid_blocker), "no", "yes"))
 
 names(svy_monkey14)
-drop <- c("type","value","type1","value2")
 
-svy_monkey15 <- svy_monkey14[,-c(29,30,32,33)] 
+#Remove columns: "antibiotic",type", "value", "type1","value1"  
+svy_monkey15 <- svy_monkey14[,-c(10,29,30,32,33)] 
 
+#Change adls to factors where Independent =1, Some Assistance = 2, Full Assistance =3
+unique(svy_monkey15$feeding_adl)
+
+#svy_monkey15$feeding_adl <-factor(svy_monkey15$feeding_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
+#svy_monkey15$walking_adl <-factor(svy_monkey15$walking_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
+#svy_monkey15$feeding_adl <-factor(svy_monkey15$feeding_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
+#svy_monkey15$transfering_adl <-factor(svy_monkey15$transfering_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
+#svy_monkey15$dressing_adl<-factor(svy_monkey15$dressing_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
+#svy_monkey15$grooming_adl  <-factor(svy_monkey15$grooming_adl , levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
+#svy_monkey15$toileting_adl <-factor(svy_monkey15$toileting_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
+
+str(svy_monkey15)
+names(svy_monkey15)
+
+#Replace ADLs with #
+
+svy_monkey16<- svy_monkey15
+
+svy_monkey16$adl_score[svy_monkey16$feeding_adl == "Independent"] <- pets$adl_score[svy_monkey16$feeding_adl == "Independent"]+2
+
+pets$adl_score[pets$adl_feed == "Some Assistance"] <- pets$adl_score[pets$adl_feed == "Some Assistance"]+1
+
+pets$adl_score[pets$adl_walk == "Independent"] <- pets$adl_score[pets$adl_walk == "Independent"]+2
+pets$adl_score[pets$adl_walk == "Some Assistance"] <- pets$adl_score[pets$adl_walk == "Some Assistance"]+1
+
+pets$adl_score[pets$adl_transfer == "Independent"] <- pets$adl_score[pets$adl_transfer == "Independent"]+2
+pets$adl_score[pets$adl_transfer == "Some Assistance"] <- pets$adl_score[pets$adl_transfer == "Some Assistance"]+1
+
+pets$adl_score[pets$adl_dress == "Independent"] <- pets$adl_score[pets$adl_dress == "Independent"]+2
+pets$adl_score[pets$adl_dress == "Some Assistance"] <- pets$adl_score[pets$adl_dress == "Some Assistance"]+1
+
+pets$adl_score[pets$adl_groom == "Independent"] <- pets$adl_score[pets$adl_groom == "Independent"]+2
+pets$adl_score[pets$adl_groom == "Some Assistance"] <- pets$adl_score[pets$adl_groom == "Some Assistance"]+1
+
+pets$adl_score[pets$adl_bathroom == "Independent"] <- pets$adl_score[pets$adl_bathroom == "Independent"]+2
+pets$adl_score[pets$adl_bathroom == "Some Assistance"] <- pets$adl_score[pets$adl_bathroom == "Some Assistance"]+1
+
+
+svy_monkey15$adl_score <- 0
 ###########
-
 svy_monkey10 <- svy_monkey9 %>% 
 mutate(ppi = ("omeprazole" + "pantoprazole"))
 
