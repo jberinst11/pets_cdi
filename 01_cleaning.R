@@ -1,11 +1,12 @@
 #Note that data are downloaded from SurveyMonkey
 #Using Analyze Results, Exports, All individual responses
-# XLS+, Original View
-# then open Excel folder, PETS SURVEY FINAL EXCEL.xlsx, dl 11.6.2018
+#XLS+, Original View
+# then open Excel folder, PETS SURVEY FINAL EXCEL.xlsx, dl on 11.6.2018
 
 #Install Latest Janitor Package with Github
 devtools::install_github("sfirke/janitor")
 install.packages("devtools")
+
 
 #load libraries
 library(rio)
@@ -35,12 +36,14 @@ svy_monkey2<- svy_monkey1  %>%
 
 svy_monkey3 <-svy_monkey2 %>% 
   subset(select = -c(respondent_id, collector_id, start_date, end_date, ip_address, 
-                     i_would_like_to_continue_and_complete_this_22_question_survey))
+
+                                          i_would_like_to_continue_and_complete_this_22_question_survey))
 
 dim(svy_monkey3)
 svy_monkey4 <- svy_monkey3 %>% 
   filter(!is.na(study_id_number))
 dim(svy_monkey4)
+names(svy_monkey4)
 
 #rename ugly columns
 svy_monkey5 <- svy_monkey4 %>%  
@@ -85,31 +88,29 @@ svy_monkey5 <- svy_monkey4 %>%
 #Remove Row 1
 
 svy_monkey6 <- svy_monkey5[-1,]
-
+names(svy_monkey6)
 #Visual Representation of missing Data  
 vis_dat(svy_monkey6)
 vis_miss(svy_monkey6)
 
-#Remove observations with missing data. Remove 260, 574, 158
-#Andrew Help
-#attach(svy_monkey6)
-#svy_monkey7 <- svy_monkey6[which(study_num == -c("260","574","158")),]
-#detach(svy_monkey6)  
-
-#Mutate to add additional Column antibiotics_yes_no
-svy_monkey7<- svy_monkey6
-str(svy_monkey7)
-svy_monkey8 <- mutate(svy_monkey7, antibiotics = ifelse(grepl("No|NO|N0|no|entocort", svy_monkey7$antibiotic), "No", "Yes"))
-
-#Reorder Columns so that Antibiotics next to Ab_no 
-names(svy_monkey8)
-
-svy_monkey9 <- svy_monkey8[c(1:9,10, 38, 11:37)] 
-
+#Mutate to add additional Column antibiotics3mo (where Yes ABx = Yes, No and non-ABx =No)
 # note that some yes = entocort, zofran
 #This was personally verified to ensure it transferred
+svy_monkey7<- svy_monkey6
+str(svy_monkey7)
+svy_monkey8 <- mutate(svy_monkey7, antibiotics3mo = ifelse(grepl("No|NO|N0|no|entocort", svy_monkey7$antibiotic), "No", "Yes"))
+str(svy_monkey8)
 
-#Gather all the PPI
+#Reorder Columns so that Antibiotics next to antibiotics3mo inorder to verify the accurate mutate
+names(svy_monkey8)
+
+svy_monkey9 <- svy_monkey8[c(1:10,38, 11:37)] #Verified
+
+names(svy_monkey9)
+
+
+#Gather all the PPI to a new catagory and add a new column to be called ppi (on ppi = Yes, not on ppi =no)
+#Transfer Verified
 
 svy_monkey10 <-gather(svy_monkey9,type,value,omeprazole:pantoprazole)
 svy_monkey11 <- mutate(svy_monkey10, ppi = ifelse(is.na(svy_monkey10$value), "No", "Yes"))
@@ -119,45 +120,56 @@ names(svy_monkey11)
 svy_monkey12 <-gather(svy_monkey11,type1,value1,famotidine:nizatidine)
 svy_monkey13 <- mutate(svy_monkey12, h2ra = ifelse(is.na(svy_monkey12$value1), "No", "Yes"))
 
-#Convert "I Have not uced acid blockers"
+#Convert "I Have not uced acid blockers" to yes/no where yes means on PPI/HR2A and no means none
 
 svy_monkey14 <- mutate(svy_monkey13, acid_blocker_yes  = ifelse(grepl("blocking", acid_blocker), "no", "yes"))
 
+#Reorder with with acid_blocker next new catagory acid_blocker_yes
+svy_monkeytest<- svy_monkey14[c(1:11, 13:35, 12)] 
+View(svy_monkeytest)
+
 names(svy_monkey14)
 
-#Remove columns: "antibiotic",type", "value", "type1","value1"  
-svy_monkey15 <- svy_monkey14[,-c(10,29,30,32,33)] 
+###**** Cleaning needed. Need to be able to compare PPI, H2RA and then add 1 if positive to the acid_blocker_yes
+## May not be nessisary to if do not plan to use this catagory
+
+#Remove columns: "antibiotic",acid_blocker type", "value", "type1","value1"  
+svy_monkey15 <- svy_monkey14[,-c(10,12,29,30,32,33)] 
 
 #Change adls to factors where Independent =1, Some Assistance = 2, Full Assistance =3
+names(svy_monkey15)
 str(svy_monkey15)
+svy_monkey16<- svy_monkey15
 
-str()
-svy_monkey16$feeding_adl <-as.numeric(factor(svy_monkey15$feeding_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
-svy_monkey16$walking_adl <-as.numeric(factor(svy_monkey15$walking_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
-svy_monkey16$transfer_adl <-as.numeric(factor(svy_monkey15$transfer_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
-svy_monkey16$dressing_adl<-as.numeric(factor(svy_monkey15$dressing_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
-svy_monkey16$grooming_adl  <-as.numeric(factor(svy_monkey15$grooming_adl , levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
-svy_monkey16$toileting_adl <-as.numeric(factor(svy_monkey15$toileting_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
-
+svy_monkey16$feeding_adl <-as.numeric(factor(svy_monkey16$feeding_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
+svy_monkey16$walking_adl <-as.numeric(factor(svy_monkey16$walking_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
+svy_monkey16$transfer_adl <-as.numeric(factor(svy_monkey16$transfer_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
+svy_monkey16$dressing_adl<-as.numeric(factor(svy_monkey16$dressing_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
+svy_monkey16$grooming_adl  <-as.numeric(factor(svy_monkey16$grooming_adl , levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
+svy_monkey16$toileting_adl <-as.numeric(factor(svy_monkey16$toileting_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
 
 str(svy_monkey16)
-names(svy_monkey15)
+names(svy_monkey16)
 
-#Replace ADLs with #
 
 svy_monkey17 <- svy_monkey16 %>% 
   mutate(adl_total = feeding_adl + walking_adl + transfer_adl + dressing_adl + grooming_adl + toileting_adl)
 
-#Reorder so that adl_total is beside other adls
+str(svy_monkey17)
+
+
+#Reorder so that adl_total is beside other adls and verify. 
+#This has been verified
 
 names(svy_monkey17)
 
 #Reorder
-svy_monkey18 <- svy_monkey17[c(1:10, 28:30, 12:15, 31, 22:27)] 
+svy_monkey18 <- svy_monkey17[c(1:10, 27:29, 12:14, 15:20, 30, 22:26)] 
 names(svy_monkey18)
 
 
 #Create all columns as factors then conver to numeric
+str(svy_monkey18)
 
 svy_monkey18$restaurant3 <-ifelse(svy_monkey18$restaurant3=="Yes",1,0)
 svy_monkey18$dessert3 <-ifelse(svy_monkey18$dessert3=="Yes",1,0)
@@ -166,7 +178,7 @@ svy_monkey18$salad3 <-ifelse(svy_monkey18$salad3=="Yes",1,0)
 svy_monkey18$redwine3 <-ifelse(svy_monkey18$redwine3=="Yes",1,0)
 svy_monkey18$vitamin <-ifelse(svy_monkey18$vitamin=="Yes",1,0)
 svy_monkey18$probiotic <-ifelse(svy_monkey18$probiotic=="Yes",1,0)
-svy_monkey18$antibiotic <-ifelse(svy_monkey18$antibiotic=="Yes",1,0)
+svy_monkey18$antibiotics3mo <-ifelse(svy_monkey18$antibiotics3mo=="Yes",1,0)
 svy_monkey18$cdi <-ifelse(svy_monkey18$cdi=="Yes",1,0)
 svy_monkey18$health_care <-ifelse(svy_monkey18$health_care=="Yes",1,0)
 svy_monkey18$hospital3 <-ifelse(svy_monkey18$hospital3=="Yes",1,0)
@@ -185,29 +197,17 @@ svy_monkey18$dairy <- as.numeric(svy_monkey18$dairy)
 str(svy_monkey18)
 View(svy_monkey18)
 
+#Still have to figure out what to do with missing values
 
-#svy_monkey16$adl_score[svy_monkey16$feeding_adl == "Independent"] <- pets$adl_score[svy_monkey16$feeding_adl == "Independent"]+2
+vis_dat(svy_monkey18)
+vis_miss(svy_monkey18)
 
-#pets$adl_score[pets$adl_feed == "Some Assistance"] <- pets$adl_score[pets$adl_feed == "Some Assistance"]+1
 
-#pets$adl_score[pets$adl_walk == "Independent"] <- pets$adl_score[pets$adl_walk == "Independent"]+2
-pets$adl_score[pets$adl_walk == "Some Assistance"] <- pets$adl_score[pets$adl_walk == "Some Assistance"]+1
 
-pets$adl_score[pets$adl_transfer == "Independent"] <- pets$adl_score[pets$adl_transfer == "Independent"]+2
-pets$adl_score[pets$adl_transfer == "Some Assistance"] <- pets$adl_score[pets$adl_transfer == "Some Assistance"]+1
-
-pets$adl_score[pets$adl_dress == "Independent"] <- pets$adl_score[pets$adl_dress == "Independent"]+2
-pets$adl_score[pets$adl_dress == "Some Assistance"] <- pets$adl_score[pets$adl_dress == "Some Assistance"]+1
-
-pets$adl_score[pets$adl_groom == "Independent"] <- pets$adl_score[pets$adl_groom == "Independent"]+2
-pets$adl_score[pets$adl_groom == "Some Assistance"] <- pets$adl_score[pets$adl_groom == "Some Assistance"]+1
-
-pets$adl_score[pets$adl_bathroom == "Independent"] <- pets$adl_score[pets$adl_bathroom == "Independent"]+2
-pets$adl_score[pets$adl_bathroom == "Some Assistance"] <- pets$adl_score[pets$adl_bathroom == "Some Assistance"]+1
+##################Code not used beyond this point#####
 
 
 svy_monkey15$adl_score <- 0
-###########
 svy_monkey10 <- svy_monkey9 %>% 
 mutate(ppi = ("omeprazole" + "pantoprazole"))
 
@@ -217,6 +217,7 @@ svy_monkey11 <- svy_monkey9 %>%
          
 svy_monkey11 <- svy_monkey10[c(1:16, 35, 17:33)] 
 names(svy_monkey10)
+
 
 
 svy_monkey10 <- mutate(svy_monkey9,PPI_yes = ifelse(grepl("omep|esom|prevacid|dexlansoprazole|rabeprazole|pantoprazole", svy_monkey9$ppi), "yes", "no"))
@@ -240,7 +241,10 @@ pets$abx[c(16,37, 46,74,75)] <- "No"
 
 str(svy_monkey6)
 
-##################
+
+#Still need to 
+
+
 
 #fix acid_blocker variable
 #sum(is.na(svy_monkey6$acid_blocker)) #59 missing
