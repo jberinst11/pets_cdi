@@ -98,8 +98,8 @@ vis_miss(svy_monkey6)
 
 #Mutate to add additional Column antibiotics_yes_no
 svy_monkey7<- svy_monkey6
-
-svy_monkey8 <- mutate(svy_monkey7,antibiotics_no = ifelse(grepl("No|NO|N0|no|entocort", svy_monkey7$antibiotic), "No", "Yes"))
+str(svy_monkey7)
+svy_monkey8 <- mutate(svy_monkey7, antibiotics = ifelse(grepl("No|NO|N0|no|entocort", svy_monkey7$antibiotic), "No", "Yes"))
 
 #Reorder Columns so that Antibiotics next to Ab_no 
 names(svy_monkey8)
@@ -129,28 +129,68 @@ names(svy_monkey14)
 svy_monkey15 <- svy_monkey14[,-c(10,29,30,32,33)] 
 
 #Change adls to factors where Independent =1, Some Assistance = 2, Full Assistance =3
-unique(svy_monkey15$feeding_adl)
-
-#svy_monkey15$feeding_adl <-factor(svy_monkey15$feeding_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
-#svy_monkey15$walking_adl <-factor(svy_monkey15$walking_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
-#svy_monkey15$feeding_adl <-factor(svy_monkey15$feeding_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
-#svy_monkey15$transfering_adl <-factor(svy_monkey15$transfering_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
-#svy_monkey15$dressing_adl<-factor(svy_monkey15$dressing_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
-#svy_monkey15$grooming_adl  <-factor(svy_monkey15$grooming_adl , levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
-#svy_monkey15$toileting_adl <-factor(svy_monkey15$toileting_adl, levels = c(NA, "Independent", "Some Assistance", "Full Assistance"), ordered =TRUE) 
-
 str(svy_monkey15)
+
+str()
+svy_monkey16$feeding_adl <-as.numeric(factor(svy_monkey15$feeding_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
+svy_monkey16$walking_adl <-as.numeric(factor(svy_monkey15$walking_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
+svy_monkey16$transfer_adl <-as.numeric(factor(svy_monkey15$transfer_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
+svy_monkey16$dressing_adl<-as.numeric(factor(svy_monkey15$dressing_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
+svy_monkey16$grooming_adl  <-as.numeric(factor(svy_monkey15$grooming_adl , levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
+svy_monkey16$toileting_adl <-as.numeric(factor(svy_monkey15$toileting_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
+
+
+str(svy_monkey16)
 names(svy_monkey15)
 
 #Replace ADLs with #
 
-svy_monkey16<- svy_monkey15
+svy_monkey17 <- svy_monkey16 %>% 
+  mutate(adl_total = feeding_adl + walking_adl + transfer_adl + dressing_adl + grooming_adl + toileting_adl)
 
-svy_monkey16$adl_score[svy_monkey16$feeding_adl == "Independent"] <- pets$adl_score[svy_monkey16$feeding_adl == "Independent"]+2
+#Reorder so that adl_total is beside other adls
 
-pets$adl_score[pets$adl_feed == "Some Assistance"] <- pets$adl_score[pets$adl_feed == "Some Assistance"]+1
+names(svy_monkey17)
 
-pets$adl_score[pets$adl_walk == "Independent"] <- pets$adl_score[pets$adl_walk == "Independent"]+2
+#Reorder
+svy_monkey18 <- svy_monkey17[c(1:10, 28:30, 12:15, 31, 22:27)] 
+names(svy_monkey18)
+
+
+#Create all columns as factors then conver to numeric
+
+svy_monkey18$restaurant3 <-ifelse(svy_monkey18$restaurant3=="Yes",1,0)
+svy_monkey18$dessert3 <-ifelse(svy_monkey18$dessert3=="Yes",1,0)
+svy_monkey18$meat3 <-ifelse(svy_monkey18$meat3=="Yes",1,0)
+svy_monkey18$salad3 <-ifelse(svy_monkey18$salad3=="Yes",1,0)
+svy_monkey18$redwine3 <-ifelse(svy_monkey18$redwine3=="Yes",1,0)
+svy_monkey18$vitamin <-ifelse(svy_monkey18$vitamin=="Yes",1,0)
+svy_monkey18$probiotic <-ifelse(svy_monkey18$probiotic=="Yes",1,0)
+svy_monkey18$antibiotic <-ifelse(svy_monkey18$antibiotic=="Yes",1,0)
+svy_monkey18$cdi <-ifelse(svy_monkey18$cdi=="Yes",1,0)
+svy_monkey18$health_care <-ifelse(svy_monkey18$health_care=="Yes",1,0)
+svy_monkey18$hospital3 <-ifelse(svy_monkey18$hospital3=="Yes",1,0)
+svy_monkey18$hc_facility3 <-ifelse(svy_monkey18$hc_facility3=="Yes",1,0)
+svy_monkey18$dog_allerg <-ifelse(svy_monkey18$dog_allerg =="Yes",1,0)
+svy_monkey18$cat_allerg <-ifelse(svy_monkey18$cat_allerg=="Yes",1,0)
+svy_monkey18$dog <-ifelse(svy_monkey18$dog=="Yes",1,0)
+svy_monkey18$dog_outside <-ifelse(svy_monkey18$dog_outside=="Yes",1,0)
+svy_monkey18$cat <-ifelse(svy_monkey18$cat=="Yes",1,0)
+svy_monkey18$cat_outside <-ifelse(svy_monkey18$cat_outside=="Yes",1,0)
+svy_monkey18$ppi <-ifelse(svy_monkey18$ppi=="Yes",1,0)
+svy_monkey18$h2ra <-ifelse(svy_monkey18$h2ra=="Yes",1,0)
+svy_monkey18$acid_blocker_yes <-ifelse(svy_monkey18$acid_blocker_yes=="Yes",1,0)
+svy_monkey18$dairy <- as.numeric(svy_monkey18$dairy)
+
+str(svy_monkey18)
+View(svy_monkey18)
+
+
+#svy_monkey16$adl_score[svy_monkey16$feeding_adl == "Independent"] <- pets$adl_score[svy_monkey16$feeding_adl == "Independent"]+2
+
+#pets$adl_score[pets$adl_feed == "Some Assistance"] <- pets$adl_score[pets$adl_feed == "Some Assistance"]+1
+
+#pets$adl_score[pets$adl_walk == "Independent"] <- pets$adl_score[pets$adl_walk == "Independent"]+2
 pets$adl_score[pets$adl_walk == "Some Assistance"] <- pets$adl_score[pets$adl_walk == "Some Assistance"]+1
 
 pets$adl_score[pets$adl_transfer == "Independent"] <- pets$adl_score[pets$adl_transfer == "Independent"]+2
