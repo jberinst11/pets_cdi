@@ -22,7 +22,7 @@ library(tidyr)
 
 #Import master_survey and svy_monkey
 
-master_cdi1 <- read_excel("PETS SURVEY FINAL EXCEL.xlsx")
+factor
 svy_monkey1 <- read_excel("Clostridium difficile Pets Survey.xlsx")
 
 
