@@ -107,39 +107,64 @@ names(svy_monkey8)
 svy_monkey9 <- svy_monkey8[c(1:10,38, 11:37)] #Verified
 
 names(svy_monkey9)
+unique(svy_monkey9$omeprazole)
 
-
-#Gather all the PPI to a new catagory and add a new column to be called ppi (on ppi = Yes, not on ppi =no)
+#Convert PPI _H2RA into numeric where use =yes and none = No
 #Transfer Verified
 
-svy_monkey10 <-gather(svy_monkey9,type,value,omeprazole:pantoprazole)
-svy_monkey11 <- mutate(svy_monkey10, ppi = ifelse(is.na(svy_monkey10$value), "No", "Yes"))
+svy_monkey9$omeprazole <-as.numeric(factor(svy_monkey9$omeprazole, levels = "Omeprazole (Prilosec)", ordered =TRUE))
+svy_monkey9$esomeprazole <-as.numeric(factor(svy_monkey9$esomeprazole, levels = "Esomeprazole (Nexium)", ordered =TRUE))
+svy_monkey9$prevacid <-as.numeric(factor(svy_monkey9$prevacid, levels = "Prevacid (lansoprazole)", ordered =TRUE)) 
+svy_monkey9$dexlansoprazole <-as.numeric(factor(svy_monkey9$dexlansoprazole, levels = "Dexlansoprazole (Dexilant)", ordered =TRUE))                                                
+svy_monkey9$rabeprazole <-as.numeric(factor(svy_monkey9$rabeprazole, levels = "Rabeprazole (Aciphex)", ordered =TRUE)) 
+svy_monkey9$pantoprazole <-as.numeric(factor(svy_monkey9$pantoprazole, levels = "Pantoprazole (Protonix)", ordered =TRUE)) 
+svy_monkey9$famotidine <-as.numeric(factor(svy_monkey9$famotidine, levels = "Famotidine (Pepcid)", ordered =TRUE))
+svy_monkey9$ranitidine <-as.numeric(factor(svy_monkey9$ranitidine, levels = "Ranitidine (Zantac)", ordered =TRUE)) 
+svy_monkey9$cimetidine <-as.numeric(factor(svy_monkey9$cimetidine, levels = "Cimetidine (Tagamet)", ordered =TRUE))                                                
+svy_monkey9$nizatidine <-as.numeric(factor(svy_monkey9$nizatidine, levels = "Nizatidine (Axid)", ordered =TRUE)) 
 
-#Gather all the H2RA
-names(svy_monkey11)
-svy_monkey12 <-gather(svy_monkey11,type1,value1,famotidine:nizatidine)
-svy_monkey13 <- mutate(svy_monkey12, h2ra = ifelse(is.na(svy_monkey12$value1), "No", "Yes"))
+#Convert 1=use and 0= no use
+
+svy_monkey10<- svy_monkey9
+
+svy_monkey10$omeprazole[is.na(svy_monkey9$omeprazole)] <- 0
+svy_monkey10$esomeprazole[is.na(svy_monkey9$esomeprazole)] <- 0
+svy_monkey10$prevacid[is.na(svy_monkey9$prevacid)] <- 0
+svy_monkey10$dexlansoprazole[is.na(svy_monkey9$dexlansoprazole)] <- 0                                           
+svy_monkey10$rabeprazole[is.na(svy_monkey9$rabeprazole)] <- 0
+svy_monkey10$pantoprazole[is.na(svy_monkey9$pantoprazole)] <- 0
+svy_monkey10$famotidine[is.na(svy_monkey9$famotidine)] <- 0
+svy_monkey10$ranitidine[is.na(svy_monkey9$ranitidine)] <- 0
+svy_monkey10$cimetidine[is.na(svy_monkey9$cimetidine)] <- 0                                             
+svy_monkey10$nizatidine[is.na(svy_monkey9$nizatidine)] <- 0
+
+#Create new Catagory for ppi and one catagory for H2RA use
+
+str(svy_monkey10)
+
+svy_monkey11 <- svy_monkey10 %>% 
+  mutate(ppi= omeprazole + esomeprazole + prevacid + dexlansoprazole + rabeprazole + pantoprazole, h2ra =nizatidine + cimetidine + ranitidine +famotidine)
+#Note there are 3 peopele on 2 PPIs
+#Note there is 1 person on 2 H2RAs
+
 
 #Convert "I Have not uced acid blockers" to yes/no where yes means on PPI/HR2A and no means none
 
-svy_monkey14 <- mutate(svy_monkey13, acid_blocker_yes  = ifelse(grepl("blocking", acid_blocker), "no", "yes"))
+svy_monkey12 <- mutate(svy_monkey11, acid_blocker_yes  = ifelse(grepl("blocking", acid_blocker), "no", "yes"))
 
-#Reorder with with acid_blocker next new catagory acid_blocker_yes
-svy_monkeytest<- svy_monkey14[c(1:11, 13:35, 12)] 
-View(svy_monkeytest)
+names(svy_monkey12)
 
-names(svy_monkey14)
 
 ###**** Cleaning needed. Need to be able to compare PPI, H2RA and then add 1 if positive to the acid_blocker_yes
 ## May not be nessisary to if do not plan to use this catagory
 
 #Remove columns: "antibiotic",acid_blocker type", "value", "type1","value1"  
-svy_monkey15 <- svy_monkey14[,-c(10,12,29,30,32,33)] 
+svy_monkey13 <- svy_monkey12[,-c(10,12:22)] 
 
 #Change adls to factors where Independent =1, Some Assistance = 2, Full Assistance =3
-names(svy_monkey15)
-str(svy_monkey15)
-svy_monkey16<- svy_monkey15
+
+svy_monkey16<- svy_monkey13
+names(svy_monkey12)
 
 svy_monkey16$feeding_adl <-as.numeric(factor(svy_monkey16$feeding_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
 svy_monkey16$walking_adl <-as.numeric(factor(svy_monkey16$walking_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
@@ -151,12 +176,11 @@ svy_monkey16$toileting_adl <-as.numeric(factor(svy_monkey16$toileting_adl, level
 str(svy_monkey16)
 names(svy_monkey16)
 
-
+#Create an ADL total max = 18
 svy_monkey17 <- svy_monkey16 %>% 
   mutate(adl_total = feeding_adl + walking_adl + transfer_adl + dressing_adl + grooming_adl + toileting_adl)
 
 str(svy_monkey17)
-
 
 #Reorder so that adl_total is beside other adls and verify. 
 #This has been verified
@@ -164,45 +188,77 @@ str(svy_monkey17)
 names(svy_monkey17)
 
 #Reorder
-svy_monkey18 <- svy_monkey17[c(1:10, 27:29, 12:14, 15:20, 30, 22:26)] 
+svy_monkey18 <- svy_monkey17[c(1:10, 27:29, 11:14, 15:20, 30, 21:26)] 
 names(svy_monkey18)
 
 
 #Create all columns as factors then conver to numeric
 str(svy_monkey18)
 
-svy_monkey18$restaurant3 <-ifelse(svy_monkey18$restaurant3=="Yes",1,0)
-svy_monkey18$dessert3 <-ifelse(svy_monkey18$dessert3=="Yes",1,0)
-svy_monkey18$meat3 <-ifelse(svy_monkey18$meat3=="Yes",1,0)
-svy_monkey18$salad3 <-ifelse(svy_monkey18$salad3=="Yes",1,0)
-svy_monkey18$redwine3 <-ifelse(svy_monkey18$redwine3=="Yes",1,0)
-svy_monkey18$vitamin <-ifelse(svy_monkey18$vitamin=="Yes",1,0)
-svy_monkey18$probiotic <-ifelse(svy_monkey18$probiotic=="Yes",1,0)
-svy_monkey18$antibiotics3mo <-ifelse(svy_monkey18$antibiotics3mo=="Yes",1,0)
-svy_monkey18$cdi <-ifelse(svy_monkey18$cdi=="Yes",1,0)
-svy_monkey18$health_care <-ifelse(svy_monkey18$health_care=="Yes",1,0)
-svy_monkey18$hospital3 <-ifelse(svy_monkey18$hospital3=="Yes",1,0)
-svy_monkey18$hc_facility3 <-ifelse(svy_monkey18$hc_facility3=="Yes",1,0)
-svy_monkey18$dog_allerg <-ifelse(svy_monkey18$dog_allerg =="Yes",1,0)
-svy_monkey18$cat_allerg <-ifelse(svy_monkey18$cat_allerg=="Yes",1,0)
-svy_monkey18$dog <-ifelse(svy_monkey18$dog=="Yes",1,0)
-svy_monkey18$dog_outside <-ifelse(svy_monkey18$dog_outside=="Yes",1,0)
-svy_monkey18$cat <-ifelse(svy_monkey18$cat=="Yes",1,0)
-svy_monkey18$cat_outside <-ifelse(svy_monkey18$cat_outside=="Yes",1,0)
-svy_monkey18$ppi <-ifelse(svy_monkey18$ppi=="Yes",1,0)
-svy_monkey18$h2ra <-ifelse(svy_monkey18$h2ra=="Yes",1,0)
-svy_monkey18$acid_blocker_yes <-ifelse(svy_monkey18$acid_blocker_yes=="Yes",1,0)
-svy_monkey18$dairy <- as.numeric(svy_monkey18$dairy)
+svy_monkey19 <- svy_monkey18
+svy_monkey19$restaurant3 <-ifelse(svy_monkey18$restaurant3=="Yes",1,0)
+svy_monkey19$dessert3 <-ifelse(svy_monkey18$dessert3=="Yes",1,0)
+svy_monkey19$meat3 <-ifelse(svy_monkey18$meat3=="Yes",1,0)
+svy_monkey19$salad3 <-ifelse(svy_monkey18$salad3=="Yes",1,0)
+svy_monkey19$redwine3 <-ifelse(svy_monkey18$redwine3=="Yes",1,0)
+svy_monkey19$vitamin <-ifelse(svy_monkey18$vitamin=="Yes",1,0)
+svy_monkey19$probiotic <-ifelse(svy_monkey18$probiotic=="Yes",1,0)
+svy_monkey19$antibiotics3mo <-ifelse(svy_monkey18$antibiotics3mo=="Yes",1,0)
+svy_monkey19$cdi <-ifelse(svy_monkey18$cdi=="Yes",1,0)
+svy_monkey19$health_care <-ifelse(svy_monkey18$health_care=="Yes",1,0)
+svy_monkey19$hospital3 <-ifelse(svy_monkey18$hospital3=="Yes",1,0)
+svy_monkey19$hc_facility3 <-ifelse(svy_monkey18$hc_facility3=="Yes",1,0)
+svy_monkey19$dog_allerg <-ifelse(svy_monkey18$dog_allerg =="Yes",1,0)
+svy_monkey19$cat_allerg <-ifelse(svy_monkey18$cat_allerg=="Yes",1,0)
+svy_monkey19$dog <-ifelse(svy_monkey18$dog=="Yes",1,0)
+svy_monkey19$dog_outside <-ifelse(svy_monkey18$dog_outside=="Yes",1,0)
+svy_monkey19$cat <-ifelse(svy_monkey18$cat=="Yes",1,0)
+svy_monkey19$cat_outside <-ifelse(svy_monkey18$cat_outside=="Yes",1,0)
+svy_monkey19$acid_blocker_yes <-ifelse(svy_monkey18$acid_blocker_yes=="Yes",1,0)
+svy_monkey19$dairy <- as.numeric(svy_monkey18$dairy)
 
-str(svy_monkey18)
+str(svy_monkey19)
 View(svy_monkey18)
 
-#Still have to figure out what to do with missing values
 
-vis_dat(svy_monkey18)
-vis_miss(svy_monkey18)
+#Remove all other missing values
+
+vis_dat(svy_monkey19)
+vis_miss(svy_monkey19)
+
+#See which rows have missings values
+missing <- which(is.na(svy_monkey19), arr.ind=TRUE)
+
+View(svy_monkey19[c(424,297,264,263,424,297,424,383,297,264,263,297,362,327,297,100,362), ])
+
+#Replace study_num 653, 326, 214 with 0 as they do not have dogs or cats therefore there pets do not go outside
+
+svy_monkey20 <- svy_monkey19
+svy_monkey20[263,28]<-0
+svy_monkey20[264,28]<-0
+svy_monkey20[263,30]<-0
+svy_monkey20[263,30]<-0
+
+#Replace study_num 418 and 574 as these patients answered 1 to walking and leftout transfer 100
+
+svy_monkey20[100,20]<-0
+svy_monkey20[100,24]<-0
+svy_monkey20[327,20]<-0
+svy_monkey20[327,24]<-0
+
+vis_dat(svy_monkey20)
+vis_miss(svy_monkey20)
 
 
+missing1 <- which(is.na(svy_monkey20), arr.ind=TRUE)
+
+#remove remaining missing
+svy_monkey21 <- svy_monkey20
+
+svy_monkeyfinal <- drop_na(svy_monkey21)
+
+vis_dat(svy_monkeyfinal)
+vis_miss(svy_monkeyfinal)
 
 ##################Code not used beyond this point#####
 
