@@ -91,3 +91,10 @@ mtable4<- mtable3 %>%
   filter(exclude==0)
 
 dim(mtable4)
+
+svy_com_status_final <- mtable4 %>% 
+  group_by(cdi) %>% 
+  summarize(total=n())
+svy_com_status_final
+
+names(mtable4)
