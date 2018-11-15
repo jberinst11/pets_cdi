@@ -16,7 +16,7 @@ catVars <- c("gender", "race", "antibiotics3mo","ppi","h2ra", "adl_total")
 
 table1 <- CreateTableOne(vars = listVars, data = mtable4, factorVars = catVars)
 
-table1
+View(table1)
 
 #table according to CDI_status
 

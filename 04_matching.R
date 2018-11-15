@@ -1,7 +1,8 @@
 install.packages("MatchIt")
-
+install.packages("rowr")
 library(MatchIt)
 library(ggplot2)
+library(rowr)
 
 #Are we supposed to match only by  CDI status? In most examples of propensity matching, 
 #they match many co-variats and exclude their outcome varibale
@@ -16,7 +17,7 @@ p <- ggplot(mtable4, aes(fill = factor(cdi))) +
   scale_fill_discrete("cdi")
 p1<- p + aes(x = dog)
 p2<- p + aes(x = cat)
-p3<- p + aes(x = antibiotics3mo)
+p3<- p + aes(x = antibiotics3mo)p1
 p4<- p + aes(x = race)
 
 #check the balance and overlap of the continuous w/  histogram
@@ -45,4 +46,51 @@ plot(m.out,  type = "hist")
 
 summary(m.out)
 
+#Try to generate matched
+matched_table <- mtable4
+get_matches(m.out, mtable4, id_cols = "age", newdata = matched_table)
+
+View(matched_table)
+
+m.out
+class(m.out)
+
+View(match.data(m.out))
+
+testtable10 <- match.data(m.out, group="all", distance = "distance",
+           weights = "weights", subclass = "subclass")
+
+View(testtable10)
+
+es.clogit <- clogit(cdi ~ gender + age + race + restaurant3tocc:education + strata(id), logan2)
+names(mtable4)
+
+
+#Poor Man's Match it
+
+#CDI positive and male
+
+mtable5 <- mtable4 %>% 
+  filter(gender == "M", cdi == 1) %>% 
+  arrange(age)
+
+mtable5<- mtable5[-89,]
+
+View(mtable5)
+
+
+#CDI negative and male
+
+mtable6 <- mtable4 %>% 
+  filter(gender == "M", cdi == 0) %>% 
+  arrange(age)
+
+#Union
+
+male_matched <- cbind(mtable5, mtable6)
+
+
+View(male_matched) 
+
+names(male_matched)
 
