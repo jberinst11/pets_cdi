@@ -1,0 +1,77 @@
+---
+title: "C.diff Pet’s Study"
+author: "Jeffrey Berinstein"
+date: "11/15/2018"
+output: word_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+library(shiny)
+library(rmarkdown)
+library("knitr")
+devtools::session_info()
+```
+
+  
+
+## Figure 1: Flow Diagram 
+
+n = 'r nrow(cdi1)' were contacted by letter or phone call
+This was made up of 'r cdi_total_by_cdi_status' where 0 = CDI- and 1 = CDI+
+
+n= 'r nrow(mtable1)' answered the survey
+This was made up of 'r mtable %>% sort_by(cdi_status) %>% summarize(total=n()))' where 0 = CDI- and 1 = CDI+
+
+3 patients where removed due to incomplete data
+6 patients where removed due to duplicates
+
+'r nrow(cdi1)- nrow(mtable1)' where removed due to lack of response
+
+'r nrow(mtable3)' was removed due to being included as a negative control based on our institutional EMR, however discussion with patient reveiled prior history of CDI
+
+'r (nrow(cdi1)- nrow(mtable1))- nrow(mtable3)' is the number of patients remaining
+
+
+'r svy_com_status_final' final numbers where 0 = CDI- and 1 = CDI+
+
+
+##Table One
+
+```{r tables}
+library(tableone)
+library(magrittr)
+
+listVars <- c("gender", "age", "race", "antibiotics3mo","ppi","h2ra", "adl_total") 
+catVars <- c("gender", "race", "antibiotics3mo","ppi","h2ra", "adl_total")
+table2 <- CreateTableOne(listVars, mtable4, catVars, strata = c("cdi"))
+
+table2 
+
+```
+
+---
+```{r}
+
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Table 1
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -1,9 +1,9 @@
 #Import Data
-#Downloaded from mbox on 11.14.2018 with MRN removed
-#File name: "PETS SURVEY FINAL EXCEL 11.14.2018.xlsx
+#Downloaded from mbox on 11.14.2018 with MRNs, pairs, and additional tabs removed
+#File name: "PETS SURVEY FINAL EXCEL 11.17.2018.xlsx
 
 
-cdi1 <- read_excel("PETS SURVEY FINAL EXCEL 11.14.2018.xlsx")
+cdi1 <- read_excel("PETS SURVEY FINAL EXCEL 11.17.2018.xlsx")
 
 View(cdi1)
 names(cdi1)
@@ -43,7 +43,7 @@ str(cdi5)
 
 View(cdi5)
 
-dim(cdi5) #817 patients contacted
+dim(cdi5) #890 patients contacted
 
 #Catagorize patients as either  CDI+ and CDI-
 #CDI positive = 1-500 and 2000-2999
@@ -56,17 +56,15 @@ cdi_total_by_cdi_status <- cdi6 %>%
   group_by(cdi_status) %>% 
   summarize(total=n())
 
-cdi_total_by_cdi_status
-
-#423 CDI positive and #394 CDI negative contacted
+cdi_total_by_cdi_status #430 CDI positive and #460 CDI negative contacted
 
 #Combine tables using inner join
 mtable1 <- merge(x = svy_monkey23, y =cdi6, by = "study_num")
-dim(mtable1) #417 total remain(817-400=416) =401 excluxed 
+dim(mtable1) #441 total remain(890-441=) =449 excluxed for not answering
 
 
-#Remove people who were CDI status negative (i.e negative and EMR and called as a negaitve control, 
-#however survey question revieled a past medical history of CDI)
+#Remove people who were CDI status negative (i.e negative in EMR and called as a negaitve control, 
+#however survey question demonstrated a past medical history of CDI)
 
 str(mtable1)
 View(mtable1)
@@ -74,29 +72,40 @@ View(mtable1)
 mtable2 <-mtable1 %>%
   mutate(exclude =ifelse(mtable1$cdi_status ==0 & mtable1$cdi ==1, 1, 0))
 
-#Rorder to cdi, cdi_status
+#Rorder cdi_status
 
 names(mtable2)
 View(mtable2)
 
 
-
 #Remove excluded values therefore 27 removed and now with 389
 mtable3 <- mtable2 %>% 
   filter(exclude==0)
-dim(mtable3)
+
+names(mtable3)
 
 mtable4 <- mtable3[c(1,14,29, 26:28, 2:13, 15:24)]
 dim(mtable4) #413 before removal of the excluded cat
 names(mtable4)
 
+View(mtable4)
 dim(mtable4)
+#Remove patient's less than 18
 
-###Continue from here
-svy_com_status_final <- mtable4 %>% 
-  group_by(cdi) %>% 
+mtable5<- mtable4 %>% 
+  filter(age >= 18)
+dim(mtable5) #Remove 3 <18
+names(mtable5)
+
+#Note comparison of CDI and cdi_status demonstrates that some CDI+ individuals did not
+#report CDI however this was confirmed by chart view and CDI_status is more accurate!
+
+svy_com_status_final <- mtable5 %>% 
+  group_by(cdi_status) %>% 
   summarize(total=n())
 svy_com_status_final
 
-names(mtable4)
-View(mtable4)
+
+
+
+

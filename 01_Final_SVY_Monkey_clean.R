@@ -1,7 +1,7 @@
 #This file contains the code to clean patient aquired suvey data
 #File was downloaded directly from surveymonkey as 1) "all response data", 2) condensed 3) Current View 4) XLS
-#File downloaded on 11.14.2018
-#File name: "Clostridium difficile Pets Survey 11.14.2018.xlsx"
+#File downloaded on 11.17.2018
+#File name: "Clostridium difficile Pets Survey 11.17.2018.xlsx"
 
 #Install packages including Latest Janitor Package with Github
 devtools::install_github("sfirke/janitor")
@@ -27,7 +27,7 @@ library(tidyverse)
 
 #Import svy_monkey data(see above for details). Download on 11.14.2018. 
 #File name: "Clostridium difficile Pets Survey 11.14.2018.xlsx" on 
-svy_monkey1 <- read_excel("Clostridium difficile Pets Survey 11.14.2018.xlsx")
+svy_monkey1 <- read_excel("Clostridium difficile Pets Survey 11.17.2018.xlsx")
 
 #Remove unneeded rows and columns
 
@@ -181,7 +181,7 @@ svy_monkey16$dressing_adl<-as.numeric(factor(svy_monkey16$dressing_adl, levels =
 svy_monkey16$grooming_adl  <-as.numeric(factor(svy_monkey16$grooming_adl , levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE))
 svy_monkey16$toileting_adl <-as.numeric(factor(svy_monkey16$toileting_adl, levels = c("Independent", "Some Assistance", "Full Assistance"), ordered =TRUE)) 
 
-View()
+
 #Replace study_num 418 and 574 as these patients answered 1 to walking and leftout transfer
 svy_monkey16.1<-  svy_monkey16
 svy_monkey16.1$transfer_adl[is.na(svy_monkey16.1$transfer_adl)] <- 1
@@ -196,7 +196,6 @@ svy_monkey17 <- svy_monkey16.1 %>%
 #This has been verified
 
 test1 <- svy_monkey17[c(27:32,42)] 
-View(test1)
 
 
 #Removed unwanted columns
