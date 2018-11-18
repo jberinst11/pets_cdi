@@ -7,29 +7,33 @@ library(foreign)
 library(dplyr)
 library(Hmisc)
       
-#Use completed merged table from 02_Final_clean_master_cdi:mtable4
+#Use "clean_table_stata" table from 04_Final_matching.R
+
 
 #Temporary remove study_num and cdi
 
-mtable5<- mtable4 %>% 
+clean_table_strata1<- clean_table_strata %>% 
   select(-c(study_num, cdi))
 
-#Convert gender to numeric for correlation
+str(clean_table_stata1)
+
+#Build Correlation matrix with all variables using pearson correlation
+
+clean_table_stata1<- lapply(clean_table_stata1, as.numeric)
+
+cor_matrix <- cor(as.matrix(clean_table_stata1), method = "pearson", use = "complete.obs")
+
+res <- cor(clean_table_stata1)
+round(res,2)
+
+res2 <- rcorr(as.matrix(mtable6))
+res2
+
+#Convert gender and race to numeric for correlation
+
 
 
 mtable6 <- lapply(mtable5, as.numeric)
 
 str(mtable6)
-
-#Build Correlation matrix with all variables using pearson correlation
-
-
-
-cor_matrix <- cor(as.matrix(mtable6), method = "pearson", use = "complete.obs")
-
-res <- cor(mtable5)
-round(res,2)
-
-res2 <- rcorr(as.matrix(mtable6))
-res2
 

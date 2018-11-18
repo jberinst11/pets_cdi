@@ -2,7 +2,10 @@
 title: "C.diff Pet’s Study"
 author: "Jeffrey Berinstein"
 date: "11/15/2018"
-output: word_document
+output:
+  word_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r, include = FALSE}
@@ -17,61 +20,65 @@ devtools::session_info()
 
 ## Figure 1: Flow Diagram 
 
-n = 'r nrow(cdi1)' were contacted by letter or phone call
-This was made up of 'r cdi_total_by_cdi_status' where 0 = CDI- and 1 = CDI+
-
-n= 'r nrow(mtable1)' answered the survey
-This was made up of 'r mtable %>% sort_by(cdi_status) %>% summarize(total=n()))' where 0 = CDI- and 1 = CDI+
-
-3 patients where removed due to incomplete data
-6 patients where removed due to duplicates
-
-'r nrow(cdi1)- nrow(mtable1)' where removed due to lack of response
-
-'r nrow(mtable3)' was removed due to being included as a negative control based on our institutional EMR, however discussion with patient reveiled prior history of CDI
-
-'r (nrow(cdi1)- nrow(mtable1))- nrow(mtable3)' is the number of patients remaining
-
-
-'r svy_com_status_final' final numbers where 0 = CDI- and 1 = CDI+
+896 patients called or sent letters (461 CDI neg, 435 CDI pos)
+444 Remaining (446 removed due to not answering)
+414 remaining (30 removed due to +PMH of CDI and being called as a neg control)
+414 (206 CDI- and 208 CDI+)
+411 after 3 removed for being <18 (2 CDI positive and 1 CDI neg)
+410 after 1 remove for being >90 (1 CDI positive male)
+Final numbers: 205 CDI negative and 205 CDI positive patients included in this study
 
 
 ##Table One
 
-```{r tables}
+```{r table, echo = FALSE}
 library(tableone)
 library(magrittr)
 
 listVars <- c("gender", "age", "race", "antibiotics3mo","ppi","h2ra", "adl_total") 
 catVars <- c("gender", "race", "antibiotics3mo","ppi","h2ra", "adl_total")
-table2 <- CreateTableOne(listVars, mtable4, catVars, strata = c("cdi"))
+table1 <- CreateTableOne(listVars, mtable5, catVars, strata = c("cdi_status"))
 
-table2 
-
-```
-
----
-```{r}
+table1
 
 ```
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#Leaps plot for varaible selection
+
+```{r leaps plot, message = FALSE}
+
+leaps=regsubsets(cdi_status~ gender + age + race + restaurant3 + dessert3 + meat3 + salad3+redwine3 +dairy +
+                   vitamin + probiotic + antibiotics3mo + ppi +h2ra + acid_blocker_yes + health_care + hospital3 +
+                   hc_facility3 + adl_total + dog + dog_outside + cat + cat_outside, data=clean_table_strata, nbest=10)
+
+leaps=regsubsets(cdi_status~ hc_facility3 + adl_total + dog + dog_outside + cat + cat_outside, data=clean_table_strata, nbest=10)
+
+plot(leaps, scale="adjr2")
+
+
 ```
 
-## Table 1
 
-```{r cars}
-summary(cars)
+#Linear Model
+
+```{r linear regression model, message=FALSE}
+
+
+lm1<-lm(cdi_status ~ hc_facility3 + age +probiotic + hospital3 + adl_total +
+  dog:dog_outside, clean_table_strata1)
+
+summary(lm1)
+
 ```
 
-## Including Plots
+#Conditional Model
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r conditional regression, message=FALSE}
+res.clogit3.int <- survival::clogit(cdi_status ~ hc_facility3 + probiotic + hospital3 + adl_total +
+                                      dog:dog_outside + strata(stratum), clean_table_strata1)
+
+summary(res.clogit3.int)
+
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
