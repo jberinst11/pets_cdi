@@ -54,13 +54,17 @@ colnames(male_cdi_neg1) <- c("study_num.1","cdi_status.1","gender.1","age.1")
 
 male_table<- cbind(male_cdi_pos1, male_cdi_neg1)
 
-#Create new column with mutate called statum that contains the matched pair number 1:86
+#Create new column with mutate called stratum that contains the matched pair number 1:86
 male_table1<- male_table %>% 
-  mutate(statum =1:nrow(male_table))
+  mutate(stratum =1:nrow(male_table))
 
 #Evaluate diff in age
-age_diff_table<- male_table1 %>% 
-  mutate(age_diff =age-age.1)
+age_diff_table_male<- male_table1 %>% 
+mutate(age_diff =abs(age-age.1)) %>% 
+  group_by(cdi_status) %>% 
+  summarize(median_age_diff=median(age_diff), mindiff=min(age_diff), maxdiff=max(age_diff))
+
+
 
 #Keep only the study_num and startum column for CDI pos males
 names(male_table1)
@@ -71,7 +75,7 @@ male_table_neg_strat <- male_table1[c(5,9)]
 
 #Rename "study_num.1" to study_num
 
-colnames(male_table_neg_strat) <- c("study_num","statum")
+colnames(male_table_neg_strat) <- c("study_num","stratum")
 
 
 #Left join to add starum to to male_cdi_pos
@@ -107,13 +111,16 @@ colnames(female_cdi_neg1) <- c("study_num.1","cdi_status.1","gender.1","age.1")
 female_table<- cbind(female_cdi_pos1, female_cdi_neg1)
 
 
-#Create new column with mutate called statum that contains the matched pair number 1:86
+#Create new column with mutate called stratum that contains the matched pair number 1:86
 female_table1<- female_table %>% 
-  mutate(statum =1:nrow(female_table))
+  mutate(stratum =1:nrow(female_table))
 
 #Create age diff eval
 age_diff_table_female<- female_table1 %>% 
-  mutate(age_diff =age-age.1)
+  mutate(age_diff =abs(age-age.1)) %>% 
+  group_by(cdi_status) %>% 
+  summarize(median_age_diff=median(age_diff), mindiff=min(age_diff), maxdiff=max(age_diff))
+
 
 #Keep only the study_num and startum column for CDI pos females
 names(female_table1)
@@ -125,7 +132,7 @@ female_table_neg_strat <- female_table1[c(5,9)]
 
 #Rename "study_num.1" to study_num
 
-colnames(female_table_neg_strat) <- c("study_num","statum")
+colnames(female_table_neg_strat) <- c("study_num","stratum")
 
 #Left join to add starum to female_cdi_pos
 
@@ -147,6 +154,6 @@ dim(total_female_table_status)
 
 #Combine male and female table vertically 
 
-clean_table_stata<-rbind(total_female_table_status,total_male_table_status)
+clean_table_strata<-rbind(total_female_table_status,total_male_table_status)
 
-dim(clean_table_stata)
+dim(clean_table_strata)
