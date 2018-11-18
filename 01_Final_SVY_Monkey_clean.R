@@ -1,7 +1,7 @@
 #This file contains the code to clean patient aquired suvey data
 #File was downloaded directly from surveymonkey as 1) "all response data", 2) condensed 3) Current View 4) XLS
-#File downloaded on 11.17.2018
-#File name: "Clostridium difficile Pets Survey 11.17.2018.xlsx"
+#File downloaded on 11.18.2018
+#File name: "Clostridium difficile Pets Survey 11.18.2018.xlsx"
 
 #Install packages including Latest Janitor Package with Github
 devtools::install_github("sfirke/janitor")
@@ -25,9 +25,9 @@ library(tidyr)
 library(tidyverse)
 
 
-#Import svy_monkey data(see above for details). Download on 11.14.2018. 
-#File name: "Clostridium difficile Pets Survey 11.14.2018.xlsx" on 
-svy_monkey1 <- read_excel("Clostridium difficile Pets Survey 11.17.2018.xlsx")
+#Import svy_monkey data(see above for details). Download on 11.18.2018. 
+#File name: "Clostridium difficile Pets Survey 11.18.2018.xlsx" on 
+svy_monkey1 <- read_excel("Clostridium difficile Pets Survey 11.18.2018.xlsx")
 
 #Remove unneeded rows and columns
 
@@ -288,3 +288,5 @@ dim(svy_monkey22)
 svy_monkey23 <-svy_monkey22 %>%
   group_by(study_num) %>% 
   filter(n() < 2)
+
+unique(svy_moneky22$race)
