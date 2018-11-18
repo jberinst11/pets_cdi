@@ -51,7 +51,7 @@ dim(svy_monkey4)
 
 
 #rename ugly columns
-svy_monkey5 <- svy_monkey4 %>%  
+svy_monkey5 <- svy_monkey4 %>% 
   rename(study_num = study_id_number) %>% 
   rename(restaurant3 = do_you_eat_at_restaurants_more_than_3_times_per_week) %>% 
   rename(dessert3 = do_you_eat_dessert_more_than_3_times_per_week) %>% 
@@ -88,7 +88,9 @@ svy_monkey5 <- svy_monkey4 %>%
   rename(dog = do_you_have_a_dog_that_sleeps_in_your_house_each_night) %>% 
   rename(dog_outside = does_your_dog_go_outside_each_day) %>% 
   rename(cat = do_you_have_a_cat_that_sleeps_in_your_house_each_night) %>% 
-  rename(cat_outside = does_your_cat_go_outside_each_day)  
+  rename(cat_outside = does_your_cat_go_outside_each_day)
+
+dim(svy_monkey5)
 
 #Remove Row 1
 
@@ -289,4 +291,6 @@ svy_monkey23 <-svy_monkey22 %>%
   group_by(study_num) %>% 
   filter(n() < 2)
 
-unique(svy_moneky22$race)
+dim(svy_monkey23)
+
+
